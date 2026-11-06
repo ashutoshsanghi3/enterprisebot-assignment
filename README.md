@@ -1,4 +1,4 @@
 ## How I used AI
-
 - **Part 1 (Service & Docker):** Used Gemini to generate the initial Flask app boilerplate and the basic multi-stage Dockerfile structure. I manually stepped in to configure the virtual environment `PATH` routing and enforced the non-root `appuser` ownership, as the AI initially defaulted to a standard root execution.
 - **Part 2 (Helm Chart):** Prompted Gemini to scaffold the base Kubernetes YAMLs (Deployment, Service, Ingress) to save time typing API versions. I manually wired up the `ConfigMap` injections, adjusted the health probe timings, and added `ingressClassName: nginx` to the Ingress resource, which the AI missed but is required for the local kind controller to pick up the routes.
+- **Part 3 (Automation):** Used Gemini to fetch the exact `kubectl wait` label selectors for the `ingress-nginx` controller. Local `kind` clusters often fail Helm deployments if the admission webhook isn't fully ready, so using AI saved me from digging through Kubernetes docs for the exact command. I manually wrote the Bash idempotency logic (checking `kind get clusters` before creation) to ensure the script safely handles multiple executions.
