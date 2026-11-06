@@ -25,6 +25,8 @@ spec:
             - name: http
               containerPort: {{ .Values.common.port }}
           env:
+            - name: PORT
+              value: {{ .Values.common.port | quote }}
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
@@ -42,12 +44,19 @@ spec:
             timeoutSeconds: 3
           securityContext:
             runAsNonRoot: true
+            runAsUser: 1000
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
           resources:
             {{- toYaml .Values.reporter.resources | nindent 12 }}
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /var/cache/app
+      volumes:
+        - name: cache-volume
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -63,3 +72,34 @@ spec:
     - name: http
       port: 8080
       targetPort: {{ .Values.common.port }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.reporter.serviceAccountName }}
+  labels:
+    app: reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: reporter-pod-reader
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reporter-read-pods
+  namespace: {{ .Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.reporter.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: reporter-pod-reader
+  apiGroup: rbac.authorization.k8s.io
