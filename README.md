@@ -1,3 +1,4 @@
 ## How I used AI
 
-I used an AI assistant to write the initial `app.py` Flask service.
+- **Part 1 (Service & Docker):** Used Gemini to generate the initial Flask app boilerplate and the basic multi-stage Dockerfile structure. I manually stepped in to configure the virtual environment `PATH` routing and enforced the non-root `appuser` ownership, as the AI initially defaulted to a standard root execution.
+- **Part 2 (Helm Chart):** Prompted Gemini to scaffold the base Kubernetes YAMLs (Deployment, Service, Ingress) to save time typing API versions. I manually wired up the `ConfigMap` injections, adjusted the health probe timings, and added `ingressClassName: nginx` to the Ingress resource, which the AI missed but is required for the local kind controller to pick up the routes.

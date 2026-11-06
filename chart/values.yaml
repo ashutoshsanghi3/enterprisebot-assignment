@@ -1,0 +1,16 @@
+replicaCount: 2
+image:
+  repository: demo-service
+  tag: local
+config:
+  appName: "demo-app"
+  version: "1.0"
+ingress:
+  host: demo.local
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "256Mi"
